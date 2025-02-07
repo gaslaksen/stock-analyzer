@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 
 # Set OpenAI API Key (Ensure it's stored securely)
-OPENAI_API_KEY = "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"  # Replace with your actual key
+OPENAI_API_KEY = "Put API Key Here"  # Replace with your actual key
 if not OPENAI_API_KEY:
     raise ValueError("Please set your OpenAI API key!")
 
