@@ -7,6 +7,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM
 from sklearn.preprocessing import MinMaxScaler
+import time
 
 # Function to fetch stock data
 def fetch_stock_data(ticker):
@@ -71,16 +72,9 @@ def evaluate_stock(ticker):
         'Signal': signal
     }, data
 
-# Streamlit UI
-st.title("📊 Stock Prediction with LSTM AI")
-
-tickers_input = st.text_input("Enter Stock Tickers (comma-separated)", "AAPL, GOOGL, MSFT")
-show_chart = st.checkbox("Show Stock Price Chart", value=True)
-
-if st.button("Analyze"):
-    tickers = tickers_input.split(',')
+# Function to update stock prices in real-time
+def refresh_data(tickers):
     results = []
-
     for ticker in tickers:
         ticker = ticker.strip().upper()
         stock_result, stock_data = evaluate_stock(ticker)
@@ -89,16 +83,31 @@ if st.button("Analyze"):
             results.append(stock_result)
 
             # Plot chart
-            if show_chart and stock_data is not None:
-                st.subheader(f"{ticker} - Stock Price Chart")
-                fig, ax = plt.subplots(figsize=(10, 4))
-                ax.plot(stock_data.index, stock_data['Close'], label="Close Price", color='blue')
-                ax.set_xlabel("Date")
-                ax.set_ylabel("Price")
-                ax.legend()
-                st.pyplot(fig)
+            st.subheader(f"{ticker} - Stock Price Chart")
+            fig, ax = plt.subplots(figsize=(10, 4))
+            ax.plot(stock_data.index, stock_data['Close'], label="Close Price", color='blue')
+            ax.set_xlabel("Date")
+            ax.set_ylabel("Price")
+            ax.legend()
+            st.pyplot(fig)
 
     # Display results in a table
     if results:
         results_df = pd.DataFrame(results)
         st.write(results_df)
+
+# Streamlit UI
+st.title("📊 Real-Time Stock Prediction with LSTM AI")
+
+tickers_input = st.text_input("Enter Stock Tickers (comma-separated)", "AAPL, GOOGL, MSFT")
+refresh_interval = st.slider("Refresh Interval (seconds)", min_value=30, max_value=300, value=60)
+
+# Create a refresh button
+if st.button("Refresh Now"):
+    refresh_data(tickers_input.split(','))
+
+# Automatic updates every X seconds
+st.write(f"Auto-refreshing every {refresh_interval} seconds...")
+while True:
+    time.sleep(refresh_interval)
+    refresh_data(tickers_input.split(','))
